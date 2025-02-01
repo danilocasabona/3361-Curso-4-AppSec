@@ -17,6 +17,7 @@ jobs:
           name: trufflehog-results
 
       - name: Check for secrets
+        id: check_secrets
         run: |
           if grep -q "Found" trufflehog-results.txt; then
             echo "SECRETS_DETECTED=true" >> $GITHUB_ENV
@@ -33,17 +34,17 @@ jobs:
             const issueTitle = "🚨 TruffleHog Encontrou Segredos no Código!";
             const issueBody = `
             ## 🚨 Alerta de Segurança! 🚨
-            
+
             O TruffleHog detectou credenciais ou segredos em um Pull Request recente.
-            
-            - **Workflow**: TruffleHog Scan Test
-            - **Status**: ❌ Segredos encontrados
-            - **Autor**: @${{ github.actor }}
-            - **PR/Commit**: [Clique aqui](${{ github.event.workflow_run.html_url }})
-            
-            🛑 **Revise os arquivos e remova qualquer informação sensível antes de prosseguir com o merge.**
+
+            - **Workflow**: TruffleHog Scan Test  
+            - **Status**: ❌ Segredos encontrados  
+            - **Autor**: @${{ github.actor }}  
+            - **PR/Commit**: [Clique aqui](${{ github.event.workflow_run.html_url }})  
+
+            🔴 **Revise os arquivos e remova qualquer informação sensível antes de prosseguir!**
             `;
-            
+
             github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
