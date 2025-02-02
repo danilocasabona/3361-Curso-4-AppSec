@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  issues: write # ✅ Permite criar issues no repositório
+
 jobs:
   trufflehog:
     runs-on: ubuntu-latest
