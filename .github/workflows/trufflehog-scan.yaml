@@ -3,10 +3,10 @@ name: TruffleHog Scan
 on:
   push:
     branches:
-      - "**"  # Escaneia todas as branches no push, mas com limitação de commits
+      - "**"
   pull_request:
     branches:
-      - main  # No PR para a main, escaneia tudo
+      - main
 
 permissions:
   contents: read
@@ -14,62 +14,28 @@ permissions:
 jobs:
   trufflehog:
     runs-on: ubuntu-latest
+    outputs:
+      secrets_found: ${{ steps.check-secrets.outputs.found }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Get Commit Range (Apenas para push)
-        if: github.event_name == 'push'
-        run: |
-          COMMIT_COUNT=$(git rev-list --count HEAD)
-          if [[ "$COMMIT_COUNT" -ge 5 ]]; then
-            echo "LAST_COMMIT=$(git rev-parse HEAD~5)" >> $GITHUB_ENV
-            echo "🔍 Escaneando a partir de HEAD~5"
-          else
-            echo "LAST_COMMIT=$(git rev-list --max-parents=0 HEAD)" >> $GITHUB_ENV
-            echo "🔍 Branch tem menos de 5 commits. Escaneando desde o primeiro commit."
-          fi
-
       - name: Run TruffleHog
+        id: scan
         run: |
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            echo "🔍 Executando TruffleHog apenas nos últimos 5 commits..."
-            output=$(docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git file:///pwd \
-              --since-commit $LAST_COMMIT \
-              --exclude-paths /pwd/trufflehogs-exclude-path.txt)
+          output=$(docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git file:///pwd \
+            --since-commit $(git rev-parse HEAD~5) \
+            --exclude-paths /pwd/trufflehogs-exclude-path.txt)
+          echo "$output"
+
+          # Define a saída do step para que possamos usar no job
+          if echo "$output" | grep -q "Found"; then
+            echo "found=true" >> $GITHUB_ENV
           else
-            echo "🔍 Executando TruffleHog em toda a branch (PR para main)..."
-            output=$(docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git file:///pwd \
-              --exclude-paths /pwd/trufflehogs-exclude-path.txt)
+            echo "found=false" >> $GITHUB_ENV
           fi
 
-          echo "$output" > trufflehog-results.txt
-          cat trufflehog-results.txt  # Verifica se o arquivo contém saída válida
-          
-          # Garante que o arquivo sempre existe
-          if [ ! -s trufflehog-results.txt ]; then
-            echo "Nenhum segredo encontrado. Criando um arquivo vazio para evitar erro."
-            echo "Nenhum segredo encontrado." > trufflehog-results.txt
-          fi
-
-      - name: Debug Artifact Upload
-        run: |
-          echo "🔍 Verificando se o arquivo trufflehog-results.txt foi gerado..."
-          ls -lah
-          if [ -f trufflehog-results.txt ]; then
-            echo "✅ Artefato gerado corretamente."
-          else
-            echo "❌ Nenhum arquivo de resultado foi encontrado!"
-            exit 1
-          fi
-
-      - name: Upload TruffleHog Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: trufflehog-results
-          path: trufflehog-results.txt
-          retention-days: 5  # Mantém o artefato disponível por 5 dias
-        
-      - name: Wait before finishing
-        run: sleep 10
+      - name: Set output for secrets
+        id: check-secrets
+        run: echo "found=$SECRETS_FOUND" >> $GITHUB_OUTPUT
