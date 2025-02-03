@@ -1,0 +1,11 @@
+node_modules/
+vendor/
+coverage/
+test_data/
+mock/
+logs/temp/
+logs/system/
+logs/debug/
+*.example
+.env.example
+README.md
