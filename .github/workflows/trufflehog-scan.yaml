@@ -21,12 +21,20 @@ jobs:
 
       - name: Get Commit Range (Apenas para push)
         if: github.event_name == 'push'
-        run: echo "LAST_COMMIT=$(git rev-parse HEAD~5)" >> $GITHUB_ENV
+        run: |
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          if [[ "$COMMIT_COUNT" -ge 5 ]]; then
+            echo "LAST_COMMIT=$(git rev-parse HEAD~5)" >> $GITHUB_ENV
+            echo "🔍 Escaneando a partir de HEAD~5"
+          else
+            echo "LAST_COMMIT=$(git rev-list --max-parents=0 HEAD)" >> $GITHUB_ENV
+            echo "🔍 Branch tem menos de 5 commits. Escaneando desde o primeiro commit."
+          fi
 
       - name: Run TruffleHog
         run: |
-          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
-            echo "🔍 Executando TruffleHog apenas nos últimos 5 commits..."
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "🔍 Executando TruffleHog apenas nos últimos 5 commits (ou desde o início)..."
             docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git file:///pwd \
               --since-commit $LAST_COMMIT \
               --exclude-paths /pwd/trufflehogs-exclude-path.txt
