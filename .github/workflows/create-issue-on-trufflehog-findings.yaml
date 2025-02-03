@@ -18,7 +18,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: trufflehog-results
-          path: trufflehog-results
+          path: trufflehog-results.txt
 
       - name: Check for Secrets
         run: |
@@ -30,7 +30,7 @@ jobs:
               echo "SECRETS_DETECTED=false" >> $GITHUB_ENV
             fi
           else
-            echo "⚠️ Nenhum artefato encontrado. Cancelando execução."
+            echo "⚠️ Nenhum artefato encontrado. O workflow será finalizado."
             exit 1
           fi
 
