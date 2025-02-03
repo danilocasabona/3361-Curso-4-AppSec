@@ -1,9 +1,12 @@
 name: TruffleHog Scan
 
 on:
+  push:
+    branches:
+      - "**"  # Escaneia todas as branches no push, mas com limitação de commits
   pull_request:
     branches:
-      - main
+      - main  # No PR para a main, escaneia tudo
 
 permissions:
   contents: read
@@ -16,25 +19,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Get Latest Commit Range
+      - name: Get Commit Range (Apenas para push)
+        if: github.event_name == 'push'
         run: echo "LAST_COMMIT=$(git rev-parse HEAD~5)" >> $GITHUB_ENV
 
-      - name: Run TruffleHog (Últimos 5 Commits)
+      - name: Run TruffleHog
         run: |
-          output=$(docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git file:///pwd \
-            --since-commit $LAST_COMMIT \
-            --exclude-paths=/pwd/trufflehogs-exclude-path.txt)
-          
-          echo "$output" > trufflehog-results.txt
-          
-          if echo "$output" | grep -q "Found"; then
-            echo "SECRETS_FOUND=true" >> $GITHUB_ENV
+          if [ "${{ github.event_name }}" == "push" ]; then
+            echo "🔍 Executando TruffleHog apenas nos últimos 5 commits..."
+            docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git file:///pwd \
+              --since-commit $LAST_COMMIT \
+              --exclude-paths=/pwd/trufflehogs-exclude-path.txt
           else
-            echo "SECRETS_FOUND=false" >> $GITHUB_ENV
+            echo "🔍 Executando TruffleHog em toda a branch (PR para main)..."
+            docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git file:///pwd \
+              --exclude-paths=/pwd/trufflehogs-exclude-path.txt
           fi
-
-      - name: Upload TruffleHog Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: trufflehog-results
-          path: trufflehog-results.txt
