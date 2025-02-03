@@ -70,3 +70,6 @@ jobs:
           name: trufflehog-results
           path: trufflehog-results.txt
           retention-days: 5  # Mantém o artefato disponível por 5 dias
+        
+      - name: Wait before finishing
+        run: sleep 10
