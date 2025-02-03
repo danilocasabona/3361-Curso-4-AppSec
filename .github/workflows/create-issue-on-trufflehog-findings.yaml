@@ -12,30 +12,17 @@ permissions:
 jobs:
   create-issue:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Download Scan Results
-        uses: actions/download-artifact@v4
-        with:
-          name: trufflehog-results
-          path: trufflehog-results.txt
-
       - name: Check for Secrets
         run: |
-          if [ -f trufflehog-results/trufflehog-results.txt ]; then
-            echo "✅ Artefato encontrado: trufflehog-results.txt"
-            if grep -q "Found" trufflehog-results/trufflehog-results.txt; then
-              echo "SECRETS_DETECTED=true" >> $GITHUB_ENV
-            else
-              echo "SECRETS_DETECTED=false" >> $GITHUB_ENV
-            fi
+          if [[ "${{ github.event.workflow_run.outputs.secrets_found }}" == "true" ]]; then
+            echo "SECRETS_DETECTED=true" >> $GITHUB_ENV
           else
-            echo "⚠️ Nenhum artefato encontrado. O workflow será finalizado."
-            exit 1
+            echo "SECRETS_DETECTED=false" >> $GITHUB_ENV
           fi
 
       - name: Create GitHub Issue if secrets found
-        if: env.SECRETS_DETECTED == true
+        if: env.SECRETS_DETECTED == 'true'
         run: |
           curl -L \
             -X POST \
