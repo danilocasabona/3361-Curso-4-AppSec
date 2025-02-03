@@ -16,10 +16,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Run TruffleHog
+      - name: Get Latest Commit Range
+        run: echo "LAST_COMMIT=$(git rev-parse HEAD~5)" >> $GITHUB_ENV
+
+      - name: Run TruffleHog (Últimos 5 Commits)
         run: |
-          output=$(docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:latest github \
-            --repo https://github.com/danilocasabona/3361-Curso-4-AppSec \
+          output=$(docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git file:///pwd \
+            --since-commit $LAST_COMMIT \
             --exclude-paths=/pwd/trufflehogs-exclude-path.txt)
           
           echo "$output" > trufflehog-results.txt
