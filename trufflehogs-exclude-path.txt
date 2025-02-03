@@ -6,6 +6,6 @@ mock/
 logs/temp/
 logs/system/
 logs/debug/
-*.example
-.env.example
-README.md
+.*\.example$
+.*\.env\.example$
+README\.md$

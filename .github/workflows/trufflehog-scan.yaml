@@ -25,13 +25,13 @@ jobs:
 
       - name: Run TruffleHog
         run: |
-          if [ "${{ github.event_name }}" == "push" ]; then
+          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
             echo "🔍 Executando TruffleHog apenas nos últimos 5 commits..."
             docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git file:///pwd \
               --since-commit $LAST_COMMIT \
-              --exclude-paths=/pwd/trufflehogs-exclude-path.txt
+              --exclude-paths /pwd/trufflehogs-exclude-path.txt
           else
             echo "🔍 Executando TruffleHog em toda a branch (PR para main)..."
             docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git file:///pwd \
-              --exclude-paths=/pwd/trufflehogs-exclude-path.txt
+              --exclude-paths /pwd/trufflehogs-exclude-path.txt
           fi
