@@ -46,10 +46,27 @@ jobs:
 
           echo "$output" > trufflehog-results.txt
           cat trufflehog-results.txt  # Verifica se o arquivo contém saída válida
+          
+          # Garante que o arquivo sempre existe
+          if [ ! -s trufflehog-results.txt ]; then
+            echo "Nenhum segredo encontrado. Criando um arquivo vazio para evitar erro."
+            echo "Nenhum segredo encontrado." > trufflehog-results.txt
+          fi
+
+      - name: Debug Artifact Upload
+        run: |
+          echo "🔍 Verificando se o arquivo trufflehog-results.txt foi gerado..."
+          ls -lah
+          if [ -f trufflehog-results.txt ]; then
+            echo "✅ Artefato gerado corretamente."
+          else
+            echo "❌ Nenhum arquivo de resultado foi encontrado!"
+            exit 1
+          fi
 
       - name: Upload TruffleHog Results
         uses: actions/upload-artifact@v4
         with:
           name: trufflehog-results
           path: trufflehog-results.txt
-          retention-days: 5  # Garante que o artefato fique armazenado por alguns dias
+          retention-days: 5  # Mantém o artefato disponível por 5 dias
