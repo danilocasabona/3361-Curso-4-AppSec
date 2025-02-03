@@ -33,7 +33,7 @@ jobs:
           fi
 
       - name: Create GitHub Issue if secrets found
-        if: env.SECRETS_DETECTED == "true"
+        if: env.SECRETS_DETECTED == true
         run: |
           curl -L \
             -X POST \
