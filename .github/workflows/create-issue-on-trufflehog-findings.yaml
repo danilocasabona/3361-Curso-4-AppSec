@@ -15,20 +15,25 @@ jobs:
 
     steps:
       - name: Download Scan Results
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: trufflehog-results
+          path: trufflehog-results
 
       - name: Check for Secrets
         run: |
-          if grep -q "Found" trufflehog-results.txt; then
-            echo "SECRETS_DETECTED=true" >> $GITHUB_ENV
+          if [ -f trufflehog-results/trufflehog-results.txt ]; then
+            if grep -q "Found" trufflehog-results/trufflehog-results.txt; then
+              echo "SECRETS_DETECTED=true" >> $GITHUB_ENV
+            else
+              echo "SECRETS_DETECTED=false" >> $GITHUB_ENV
+            fi
           else
             echo "SECRETS_DETECTED=false" >> $GITHUB_ENV
           fi
 
       - name: Create GitHub Issue if secrets found
-        if: env.SECRETS_DETECTED == 'true'
+        if: env.SECRETS_DETECTED == "true"
         run: |
           curl -L \
             -X POST \
@@ -38,6 +43,6 @@ jobs:
             https://api.github.com/repos/danilocasabona/3361-Curso-4-AppSec/issues \
             -d '{
               "title": "⚠️ TruffleHog Encontrou Segredos!",
-              "body": "🚨 O TruffleHog detectou credenciais ou segredos no código!\n\n🔎 **Workflow**: TruffleHog Scan\n❌ **Status**: Segredos encontrados\n👤 **Autor**: @${{ github.actor }}\n\n🔗 [Clique aqui para ver os detalhes](${{ github.event.workflow_run.html_url }})\n\n⚠️ **Revise os arquivos e remova informações sensíveis antes de prosseguir!**",
+              "body": "🚨 O TruffleHog detectou credenciais ou segredos no código!\n\n🔎 **Workflow**: TruffleHog Scan\n❌ **Status**: Segredos encontrados\n👤 **Autor**: @${{ github.actor }}\n\n🔗 [Clique aqui para ver os detalhes](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n\n⚠️ **Revise os arquivos e remova informações sensíveis antes de prosseguir!**",
               "labels": ["security", "trufflehog", "high-priority"]
             }'
