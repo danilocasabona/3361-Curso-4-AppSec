@@ -3,13 +3,13 @@ name: SonarQube Scan
 on:
   push:
     branches:
-      - feat/SonarQube  # Executa em commits nesta branch
+      - feat/Sonaqube  # Corrigido nome da branch (evitar maiúsculas)
   pull_request:
     branches:
       - main  # Executa quando um PR for criado para a main
 
 permissions:
-  contents: read
+  contents: read  # Garante acesso ao código para análise
 
 jobs:
   sonarqube:
@@ -31,11 +31,18 @@ jobs:
           unzip sonarscanner.zip
           mv sonar-scanner-5.0.1.3006-linux sonar-scanner
           echo "$(pwd)/sonar-scanner/bin" >> $GITHUB_PATH
+          echo "SONAR_SCANNER_HOME=$(pwd)/sonar-scanner" >> $GITHUB_ENV
+
+      - name: Verify SonarScanner Installation
+        run: sonar-scanner --version
 
       - name: Run SonarQube Scanner
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           sonar-scanner \
             -Dsonar.projectKey=Vollmed \
             -Dsonar.sources=. \
-            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.host.url=$SONAR_HOST_URL \
+            -Dsonar.token=$SONAR_TOKEN
