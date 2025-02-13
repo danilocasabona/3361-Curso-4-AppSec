@@ -1,15 +1,16 @@
-name: SonarQube Scan
+name: SonarCloud Scan
 
 on:
   push:
     branches:
-      - feat/Sonaqube  # Corrigido nome da branch (evitar maiúsculas)
+      - main
+      - feat/SonarQube  # Executa na branch de feature
   pull_request:
     branches:
-      - main  # Executa quando um PR for criado para a main
+      - main  # Executa quando um PR para a main é criado
 
 permissions:
-  contents: read  # Garante acesso ao código para análise
+  contents: read
 
 jobs:
   sonarqube:
@@ -25,24 +26,20 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install SonarScanner
-        run: |
-          curl -sSLo sonarscanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
-          unzip sonarscanner.zip
-          mv sonar-scanner-5.0.1.3006-linux sonar-scanner
-          echo "$(pwd)/sonar-scanner/bin" >> $GITHUB_PATH
-          echo "SONAR_SCANNER_HOME=$(pwd)/sonar-scanner" >> $GITHUB_ENV
+      - name: Cache SonarCloud Scanner
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
-      - name: Verify SonarScanner Installation
-        run: sonar-scanner --version
-
-      - name: Run SonarQube Scanner
+      - name: Run SonarCloud Scan
         env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           sonar-scanner \
-            -Dsonar.projectKey=Vollmed \
+            -Dsonar.organization=${{ secrets.SONAR_ORG }} \
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
             -Dsonar.sources=. \
-            -Dsonar.host.url=$SONAR_HOST_URL \
-            -Dsonar.token=$SONAR_TOKEN
+            -Dsonar.host.url="https://sonarcloud.io" \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
