@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feat/SonarQube  # Executa na branch de feature
+      - feat/Sonarqube  # Executa na branch de feature
   pull_request:
     branches:
       - main  # Executa quando um PR para a main é criado
