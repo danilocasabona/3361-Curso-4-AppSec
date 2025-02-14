@@ -22,4 +22,5 @@ npm start
 
 Assim o seu projeto será compilado e o servidor será esecutado na url `localhost:3000`
 
-AWS_SECRET_KEY=FAKEKEY1234567890
+AWS_ACCESS_KEY_ID=FAKEKEY12345678901234
+AWS_SECRET_ACCESS_KEY=FAKESECRET1234567890abcdef
