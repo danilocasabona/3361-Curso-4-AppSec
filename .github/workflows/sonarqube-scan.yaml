@@ -3,34 +3,21 @@ name: SonarCloud Scan
 on:
   push:
     branches:
-      - feat/Sonarqube  # Executa em commits nesta branch
+      - main
+      - feat/Sonarqube  # Altere conforme sua branch de desenvolvimento
   pull_request:
     branches:
-      - main  # Executa quando um PR for criado para a main
+      - main
 
 permissions:
   contents: read
 
 jobs:
-  sonarqube:
+  sonarcloud:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Run SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-            -Dsonar.sources=.
+      # Nenhuma outra ação é necessária, pois a análise automática do SonarCloud está ativada.
