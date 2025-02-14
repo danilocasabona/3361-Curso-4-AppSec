@@ -1,0 +1,26 @@
+name: SonarCloud Auto Issue Close
+
+on:
+  repository_dispatch:
+    types: [sonarcloud_issue_resolved]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  close-issue:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fechar Issue no GitHub
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.client_payload.issue_number }}
+        run: |
+          curl -X PATCH -H "Authorization: token $GITHUB_TOKEN" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/${{ github.repository }}/issues/$ISSUE_NUMBER \
+               -d '{"state": "closed"}'
+
+               # Teste do WebHook
