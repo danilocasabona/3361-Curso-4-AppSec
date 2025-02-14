@@ -1,0 +1,27 @@
+name: Fechar Issue no SonarCloud
+
+on:
+  issues:
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  close-sonar-issue:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fechar Issue no SonarCloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          curl -X POST "https://sonarcloud.io/api/issues/do_transition" \
+               -u "$SONAR_TOKEN:" \
+               -d "transition=RESOLVE" \
+               -d "organization=$SONAR_ORGANIZATION" \
+               -d "projectKey=$SONAR_PROJECT_KEY" \
+               -d "issue=$ISSUE_NUMBER"

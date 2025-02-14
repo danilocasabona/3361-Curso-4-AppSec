@@ -1,0 +1,23 @@
+name: SonarCloud Scan
+
+on:
+  push:
+    branches:
+      - main
+      - feat/Sonarqube  # Altere conforme sua branch de desenvolvimento
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  sonarcloud:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Nenhuma outra ação é necessária, pois a análise automática do SonarCloud está ativada.
