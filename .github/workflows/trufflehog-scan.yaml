@@ -14,8 +14,6 @@ permissions:
 jobs:
   trufflehog:
     runs-on: ubuntu-latest
-    outputs:
-      secrets_found: ${{ steps.check-secrets.outputs.found }}
 
     steps:
       - name: Checkout repository
@@ -35,7 +33,3 @@ jobs:
           else
             echo "found=false" >> $GITHUB_ENV
           fi
-
-      - name: Set output for secrets
-        id: check-secrets
-        run: echo "found=$SECRETS_FOUND" >> $GITHUB_OUTPUT

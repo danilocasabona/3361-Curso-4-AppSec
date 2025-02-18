@@ -4,6 +4,6 @@ repos:
     - id: trufflehog
       name: TruffleHog
       description: Detect secrets in your data.
-      entry: bash -c 'docker run --rm -v "$(pwd):/workdir" trufflesecurity/trufflehog:latest filesystem /workdir --json | tee result-trufflehog.txt'
+      entry: bash -c 'docker run --rm -v "${GIT_DIR:-$(git rev-parse --show-toplevel)}:/workdir" trufflesecurity/trufflehog:latest filesystem /workdir --json | tee result-trufflehog.txt'
       language: system
       stages: ["pre-commit", "pre-push"]

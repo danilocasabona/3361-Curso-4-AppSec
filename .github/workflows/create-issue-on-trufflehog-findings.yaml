@@ -13,9 +13,9 @@ jobs:
   create-issue:
     runs-on: ubuntu-latest
     steps:
-      - name: Check for Secrets
+      - name: Check if previous workflow failed
         run: |
-          if [[ "${{ github.event.workflow_run.outputs.secrets_found }}" == "true" ]]; then
+          if [[ "${{ github.event.workflow_run.conclusion }}" == "failure" ]]; then
             echo "SECRETS_DETECTED=true" >> $GITHUB_ENV
           else
             echo "SECRETS_DETECTED=false" >> $GITHUB_ENV
@@ -32,6 +32,6 @@ jobs:
             https://api.github.com/repos/danilocasabona/3361-Curso-4-AppSec/issues \
             -d '{
               "title": "⚠️ TruffleHog Encontrou Segredos!",
-              "body": "🚨 O TruffleHog detectou credenciais ou segredos no código!\n\n🔎 **Workflow**: TruffleHog Scan\n❌ **Status**: Segredos encontrados\n👤 **Autor**: @${{ github.actor }}\n\n🔗 [Clique aqui para ver os detalhes](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n\n⚠️ **Revise os arquivos e remova informações sensíveis antes de prosseguir!**",
+              "body": "🚨 O TruffleHog detectou credenciais ou segredos no código!\n\n🔎 **Workflow**: TruffleHog Scan\n❌ **Status**: Segredos encontrados\n👤 **Autor**: @${{ github.actor }}\n\n🔗 [Clique aqui para ver os detalhes](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }})\n\n⚠️ **Revise os arquivos e remova informações sensíveis antes de prosseguir!**",
               "labels": ["security", "trufflehog", "high-priority"]
             }'
