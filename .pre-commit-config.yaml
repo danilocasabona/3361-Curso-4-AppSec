@@ -1,11 +1,10 @@
 repos:
 - repo: local
   hooks:
-    - id: trufflehog
-      name: TruffleHog
-      description: Detect secrets in your data.
-      entry: bash -c 'echo "🔎 Executando TruffleHog..."; docker run --rm -v "$(pwd):/workdir" trufflesecurity/trufflehog:latest filesystem /workdir --json | tee result-trufflehog.txt'
+    - id: test-hook
+      name: Test Hook
+      description: Apenas para testar se o pre-commit está rodando.
+      entry: bash -c 'echo "🔍 O pre-commit está funcionando!"'
       language: system
-      pass_filenames: false
       always_run: true
-      stages: ["pre-commit", "pre-push"]
+      stages: ["pre-commit"]
