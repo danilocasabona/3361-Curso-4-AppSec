@@ -6,5 +6,15 @@ repos:
       description: Apenas para testar se o pre-commit está rodando.
       entry: bash -c 'echo "🔍 O pre-commit está funcionando!"'
       language: system
+      pass_filenames: false
       always_run: true
       stages: ["pre-commit"]
+
+    - id: trufflehog
+      name: TruffleHog
+      description: Detectar segredos no código.
+      entry: bash -c 'echo "🔍 Executando TruffleHog..." && docker run --rm -v "$(pwd):/workdir" trufflesecurity/trufflehog:latest filesystem /workdir --json | tee result-trufflehog.txt'
+      language: system
+      pass_filenames: false  # Evita múltiplas execuções
+      always_run: true
+      stages: ["pre-commit", "pre-push"]
